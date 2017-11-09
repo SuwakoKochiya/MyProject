@@ -61,9 +61,7 @@ def createTree(dataSet):
             if item in freqItemSet:
                 localD[item] = headerTable[item][0] # 注意这个[0]，因为之前加过一个数据项
         if len(localD) > 0:
-            print(localD)
             orderedItems = [v[0] for v in sorted(localD.items(), key=lambda p: (-p[1],p[0]))] # 排序 按（值降序，值升序）排序
-            print(orderedItems)
             updateTree(orderedItems, retTree, headerTable,count) # 更新FP树
     return retTree, headerTable
 
@@ -106,25 +104,25 @@ def ascendTree(lefeNode,prefixPath):
         prefixPath.append(lefeNode.name)
         lefeNode = lefeNode.parent
 
-def mineTree(headerTable, preFix, freqItemList):
+def mineTree(headerTable, preFix, freqItemList,dictItems):
     bigL = [v[0] for v in sorted(headerTable.items(), key=lambda p: p[1][0])]
     for basePat in bigL:
         newFreqSet = preFix.copy()
         newFreqSet.add(basePat)
         freqItemList.append(newFreqSet)
+        dictItems[frozenset(newFreqSet)] = headerTable[basePat][0]
         basePatConPats = findPrefixPath(headerTable[basePat][1])
         _,myHead = createTree(basePatConPats)
         if myHead != None:
-            mineTree(myHead,newFreqSet,freqItemList)
+            mineTree(myHead,newFreqSet,freqItemList,dictItems)
 
 def fpGrowth():
     initSet = createInitSet(loadSimpDat())
     myFPtree, myHeaderTab = createTree(initSet)
     freqItems = []
-    mineTree(myHeaderTab, set([]), freqItems)
-    print(freqItems)
+    dictItems = {}
+    mineTree(myHeaderTab, set([]), freqItems,dictItems)
+    return freqItems,dictItems
 
-
-fpGrowth()
 
 
